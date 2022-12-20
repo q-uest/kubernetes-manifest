@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu
+  labels:
+    app: ubuntu
+spec:
+  containers:
+  - image: ubuntu
+    command:
+      - "sleep"
+      - "604800"
+    imagePullPolicy: IfNotPresent
+    name: ubuntu
+    volumeMounts:
+      - mountPath: /tmp
+        name: jenkins-config
+  restartPolicy: Always
+  volumes:
+  - name: jenkins-config
+    configMap: 
+      name: jenkins-config
+

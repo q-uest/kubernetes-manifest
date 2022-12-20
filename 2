@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: list-deployments
+rules:
+  - apiGroups: [ apps ]
+    resources: [ deployments ]
+    verbs: [ get, list ]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ram
+  namespace: new1
+subjects:
+- kind: User
+  name: ram
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: list-deployments
+  apiGroup: rbac.authorization.k8s.io

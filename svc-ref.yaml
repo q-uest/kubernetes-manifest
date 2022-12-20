@@ -1,0 +1,9 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ref-pcl-scv
+spec:
+  type: ExternalName
+  externalName: pcl-prod.prod.svc.cluster.local
+  ports:
+  - port: 8081

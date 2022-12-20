@@ -1,0 +1,203 @@
+---
+# Source: velero/templates/serviceaccount-server.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: velero-server
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: velero-2.32.3
+---
+# Source: velero/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: velero
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: velero-2.32.3
+type: Opaque
+data:
+---
+# Source: velero/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: velero-server
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: velero-2.32.3
+subjects:
+  - kind: ServiceAccount
+    namespace: monitoring
+    name: velero-server
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: velero/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: velero-server
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: velero-2.32.3
+rules:
+- apiGroups:
+    - "*"
+  resources:
+    - "*"
+  verbs:
+    - "*"
+---
+# Source: velero/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: velero-server
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: velero-2.32.3
+subjects:
+  - kind: ServiceAccount
+    namespace: monitoring
+    name: velero-server
+roleRef:
+  kind: Role
+  name: velero-server
+  apiGroup: rbac.authorization.k8s.io
+---
+# Source: velero/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: velero
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: velero-2.32.3
+spec:
+  type: ClusterIP
+  ports:
+    - name: http-monitoring
+      port: 8085
+      targetPort: http-monitoring
+  selector:
+    name: velero
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+---
+# Source: velero/templates/upgrade-crds.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: velero-upgrade-crds
+  namespace: monitoring
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade,post-rollback
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: velero-2.32.3
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      name: velero-upgrade-crds
+    spec:
+      serviceAccountName: velero-server
+      initContainers:
+        - name: kubectl
+          image: "docker.io/bitnami/kubectl:1.24"
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - cp `which sh` /tmp && cp `which kubectl` /tmp
+          volumeMounts:
+            - mountPath: /tmp
+              name: crds
+      containers:
+        - name: velero
+          image: "velero/velero:v1.9.3"
+          imagePullPolicy: IfNotPresent
+          command:
+            - /tmp/sh
+          args:
+            - -c
+            - /velero install --crds-only --dry-run -o yaml | /tmp/kubectl apply -f -
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+            requests:
+              cpu: 500m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /tmp
+              name: crds
+      volumes:
+        - name: crds
+          emptyDir: {}
+      restartPolicy: OnFailure
+---
+# Source: velero/templates/backupstoragelocation.yaml
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: default
+  namespace: monitoring
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade,post-rollback
+    "helm.sh/hook-delete-policy": before-hook-creation
+  labels:
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: velero-2.32.3
+spec:
+  provider: 
+  accessMode: ReadWrite
+  objectStorage:
+    bucket:
+---
+# Source: velero/templates/volumesnapshotlocation.yaml
+apiVersion: velero.io/v1
+kind: VolumeSnapshotLocation
+metadata:
+  name: default
+  namespace: monitoring
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade,post-rollback
+    "helm.sh/hook-delete-policy": before-hook-creation
+  labels:
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: velero
+    app.kubernetes.io/managed-by: Helm
+    helm.sh/chart: velero-2.32.3
+spec:
+  provider:

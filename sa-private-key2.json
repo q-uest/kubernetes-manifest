@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "handy-freedom-363504",
+  "private_key_id": "5d98a7be75481dcddf774fe806584a72d5920b3c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDDlMikYYFAJlrl\nMBPZWC2KvLxL90Lh4YQw0pMty/QNxT1u8Pvz+fibr2Pkk+0Vhpul0+0XRvTp7gd2\nFe85jsptExR5R0szgd8scDKpWih/khPWsLfiNw6ikGHbjNs5vqfBly9zpnzWu1Zn\nKL4U4y3xzPZy5J2jgEZQyLHxIm/0LB+C8JyX9Cym2HCc6a59bs7nYp6UfCUVEfdp\nB3tMqcoW1ag7UxSIly1VXnZtxQEdLzg1UbJHmu4/qxLZPjSV8VgjXBcSSM+ZuxlK\nV7py0HLoJpZEK8b4MNNcw80MOuCztyzyfoxfR0kYAJIxq8UOr8VWzbaHmo6nndkF\ntWGUP1YdAgMBAAECggEAAowN/uIMMl8tgN2a7JIy6aMimqSqONHcjFw5sXd+Aq3m\namr2BQvk2nYyyVfJ1yVtIoA7jrmMV/2TGE0Z0/iRl1EPy7KLfqy60NPXPRBhBaRL\n4NhlVKtd4+0YcSkI89wRSDqlUg7BgnRnICnOK+x3fTYroXxrtyTlBYlPk/HcXmQs\n4k+6SiKDq2pLCyJCYocbHElgUnCrbHZ2BHJvWfJSP3sEmPB6tR/jPAM924fE40/f\nonJLwzmXmkPPy4FQJ31yRU4Kd6unJdN/0+fEqLVaNXS2zlOWRFQVbsnwBye5G8LP\nYcAaM/ISRBvodkv83I9agELg5zUHjb9niK/yLnhUGwKBgQDl4ht6/7Pf3phTzQX9\nza70neYpuS8OasNtfwFvdDHgtGQUS51fvcwX9kqMEvaj6T+zipOPxYEIF+Ih70Mi\naWEJqL/pCn9XXBZeR0gkqjRMcVOv5sDfCvtWXyCHiuqI1PG44ebzXajKULPrbgrX\nAQcgZ5t0NCFNMpyVwEJOArJD9wKBgQDZzQpXLO5TGiVHucC9zD8i57WQDnGSgFl+\nGBQ0OSXRv6VLXQPyZiJoopJhMy0FJU9dlB40DGrvWLN6MS82hqp5JS7rYUiMpKEV\nxdgTnbcFFAQpY7+chEY05KGtQc0KMK4D3ltSzj8zSgWLQhGpDXG8mGY/5p14acUK\nQUGgHcVJiwKBgQCKQzEWDF8qYZ4qoOBeo2v78lAxfhDAUhRSchXx6+fn53deAZCY\nufXb36U8lFdFhI9stAdGbJrLvFmk4Vv2gXz8q0MprcejSl6lu6e3batg4rRb0qTk\nQZ2jeDl/bFzdiX4NHcmjTAyuClX8XsYkRJj9s3L7NDNnU+573xPCCbsgRwKBgQCb\nDMPCwaK8GE3X3N3ggAmmUKvJbO7fK24KPRwM/W31/ueuWf5YTutJ8AojFiqDkkcI\nyEwkI37w+wVyBJemyoGLkrPvLydVsFFYzaqAdHN5MwGvcWpUAzpzpxuN2t0b1wHa\nkS4UKe2GFrkRpSwrW/3PE/MepI8PzMRQA5qzYN409wKBgQDixul3/6C29Uyie88d\nncaVaUi/J2Y5Y2oigAEc7tyyWpz7SrjJ57XZP3yTc5MlmTDAaYnge0sHAY6tj9fl\nzo8jR7WQZorXwpGnUc/Qid5YHSSCbCqjhssEttW4FHGxKbKjy9+1Zwqk2UCKeFSX\n9XRyF8/OZEZTzmVciwiTy6ZA4Q==\n-----END PRIVATE KEY-----\n",
+  "client_email": "jenkins1@handy-freedom-363504.iam.gserviceaccount.com",
+  "client_id": "111201222237721799716",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/jenkins1%40handy-freedom-363504.iam.gserviceaccount.com"
+}

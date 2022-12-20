@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1 
+kind: Ingress  
+metadata:  
+  name: myingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: jenkins1.monitoring.svc.cluster.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jenkins1
+            port:
+              number: 8080 

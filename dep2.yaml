@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: pcl-app
+  name: pcl2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pcl-app2
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: pcl-app2
+    spec:
+      containers:
+        - name: pcl
+          image: 10.182.0.3:8082/pcl:EBFX-REL1-1-EBF1_d715720
+          env:
+          - name: MYSQL_URL
+            value: jdbc:mysql://mysql.db:3306/petclinic
+      imagePullSecrets:
+        - name: regcred
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pcl-svc
+spec:
+  type: NodePort
+  selector:
+    app: pcl-app
+  ports:
+    - port: 8081
+      targetPort: 8081
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pcl-svc2
+spec:
+  type: NodePort
+  selector:
+    app: pcl-app2
+  ports:
+    - port: 8081
+      targetPort: 8081
