@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: pcl-app
+  name: pcl
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pcl-app
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: pcl-app
+    spec:
+      containers:
+        - name: pcl
+          image: <NEW_IMAGE_NAME>
+          env:
+          - name: MYSQL_URL
+            value: <REPLACE_THIS_WITH_MYSQL_URL>
+      imagePullSecrets:
+        - name: regcred
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pcl-svc
+spec:
+  type: NodePort
+  selector:
+    app: pcl-app
+  ports:
+    - port: 8090
+      targetPort: 8081
+      nodePort: 31090

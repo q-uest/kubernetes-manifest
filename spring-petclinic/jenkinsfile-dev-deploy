@@ -1,0 +1,162 @@
+pipeline 
+{
+
+  agent any 
+  environment 
+  {
+
+
+                // Trivy Threshold for critical Errors //
+		TRIVY_CRITICAL_THRES=333
+		
+		// ============================================  //
+		// Nexus Docker Private Registry connect Details //
+		// ============================================= //
+		
+		NEXUS_REG_IP='10.182.0.16'
+		NEXUS_REG_PORT=8082
+		REPO_NAME="appointme-admin-api"
+		
+				
+		// ============================================================================================================ //
+		// Helm expects to have 2 parameters Docker Image name and Tag, hence DOCK_IMG & DOCK_IMG_TAG used respectively //
+		// ============================================================================================================ //
+				
+		DOCK_IMG_NAME="${NEXUS_REG_IP}:${NEXUS_REG_PORT}/${REPO_NAME}"
+		DOCK_IMG_TAG="${BUILD_NUMBER}"
+		DOCK_IMG="${DOCK_IMG_NAME}"+":"+"${DOCK_IMG_TAG}"
+		
+		
+		
+		// =====================================================================================================================//
+		// These variables used in the post-deployment of the image into DEV and to get the tag updated with the the string DEV //
+		// =====================================================================================================================//
+		
+		ADD_DEV_TAG="${DOCK_IMG}"+"-DEV"
+		DEV_TAGGED_IMGLST="$HOME/workspace/dev-param.lst"
+		
+		
+		
+		// ===================================================================== //
+                // Provide the DEV cluster Details and GCP Priavte Key file path here    //
+		// ===================================================================== //
+		
+		JEN_KUBECONFIG="/var/lib/jenkins/.kube/kubeconfig.yaml"
+		JEN_GCP_CRED_KEY="/var/lib/jenkins/.kube/key.json"
+		
+		
+                //================================================//		
+		// Helm Release Name & Namespace to be used      //
+		// ============================================ //
+		
+                HELM_RELEASE_NAME="dev"
+                K8S_NAMESPACE="dev"
+		
+		
+		//================================================== //		
+	        // Timeout for the Deployment. Default is 5  minutes //
+		//================================================== //		
+		
+                 HELM_DEP_TIMEOUT="2m0s"
+		 
+		 // ============================ //
+		//  Path for the Helm Templates //
+		// ============================ //
+		
+		HELM_TEMPLATE_PATH="./helm-dev"
+		
+                
+   }
+
+  stages 
+  {
+        stage("Create Docker image") 
+        {
+    
+            steps 
+            {
+      
+                withCredentials([usernamePassword(credentialsId: 'nexus-secret', passwordVariable: 'pass', usernameVariable: 'username')]) 
+                {
+      
+                  sh '''
+                   sudo docker build -t ${DOCK_IMG} .
+                   sudo docker login -u ${username} -p ${pass} ${NEXUS_REG_IP}:${NEXUS_REG_PORT}
+                   sudo docker push ${DOCK_IMG}
+                
+                   '''
+		        }
+            }
+        }
+       
+       stage("Trivy Docker scan") 
+       {
+            steps 
+            {
+               sh '''
+     
+	            sudo trivy image ${DOCK_IMG} 2>/dev/null |grep "Total: [0-9]" 
+	            for TH in `sudo trivy image ${DOCK_IMG} 2>/dev/null |grep "Total: [0-9]" |cut -d ":" -f7|cut -d ")" -f1`
+	            do
+                    if [ -z "${TH}" ] || [ $TH -gt ${TRIVY_CRITICAL_THRES} ]
+	                then   
+	                  echo "FAILED:Critical: "${TH} " has Crossed the Critical Threshold Limit of "${TRIVY_CRITICAL_THRES} !!!!!
+		            exit 1
+	                fi
+	           done
+	      
+	           '''
+ 
+            }
+        }  
+	     
+   
+
+        stage("Deploy into Dev")
+        {
+            steps
+            {
+       
+                
+		sh '''
+		# Export the Shell variables required to access the GKE cluster
+		######################
+		
+		
+		export GOOGLE_APPLICATION_CREDENTIALS=${JEN_GCP_CRED_KEY}
+		export KUBECONFIG=${JEN_KUBECONFIG}
+		
+                helm upgrade --install ${HELM_RELEASE_NAME} --set image.repository=${DOCK_IMG_NAME}  --set image.tag=${DOCK_IMG_TAG} -n  ${K8S_NAMESPACE} ${HELM_TEMPLATE_PATH} --wait --timeout=${HELM_DEP_TIMEOUT}
+	  
+	            # Add a check to see the APP is working
+	            #######
+	  
+	        '''
+	           
+	   
+	           
+	            withCredentials([usernamePassword(credentialsId: 'nexus-secret', passwordVariable: 'pass', usernameVariable: 'username')]) 
+                    {
+                       sh '''
+		  
+		            # Add a new tag to the deployed image in Nexus repository to mark it has been rolled out to Dev 
+	                    ########
+	  
+                            sudo docker login -u ${username} -p ${pass} ${NEXUS_REG_IP}:${NEXUS_REG_PORT}
+                            sudo docker tag ${DOCK_IMG} ${ADD_DEV_TAG}
+		            sudo docker push ${ADD_DEV_TAG}
+	                    echo ""
+	                    echo "Images that are Deployed onto DEV......."
+		            echo ""
+	                    curl http://${username}:${pass}@${NEXUS_REG_IP}:${NEXUS_REG_PORT}/v2/${REPO_NAME}/tags/list |sed 's/,/\\n/g'|sed 's/\\"//g'|sed 's/]/\\n/g'|grep -i "\\-DEV" > /tmp/dev-tagged.lst
+		            sed 's/^/'${REPO_NAME}':/g' /tmp/dev-tagged.lst > ${DEV_TAGGED_IMGLST}
+		            cat ${DEV_TAGGED_IMGLST}
+
+                          '''
+	            }  
+	        }
+        }
+	  
+        
+    }
+}
